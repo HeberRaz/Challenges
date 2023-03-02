@@ -100,7 +100,7 @@ fileprivate final class StockGenerator {
                 if let self = self {
                     let stocks = self.getStocks()
                         .compactMap{ Bool.random() ? $0 : nil }
-                    NotificationCenter.default.post(name: .didReceiveStockUpdate, object: nil, userInfo: [stockInfoKey: stocks])
+                    NotificationCenter.myCenter.post(name: .didReceiveStockUpdate, object: nil, userInfo: [stockInfoKey: stocks])
                 }
             }
         }
@@ -114,4 +114,8 @@ extension Stock {
     func variedPrice() -> Stock {
         return Stock(price:self.price * Double.random(in: 0.98...1.02), ticker: self.ticker, companyName: self.companyName)
     }
+}
+
+extension NotificationCenter {
+    static var myCenter: NotificationCenter = NotificationCenter()
 }

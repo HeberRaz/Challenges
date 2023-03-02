@@ -11,6 +11,7 @@ final class StockListTableViewController: UITableViewController {
   // MARK: Properties
   private var stockListViewModel = StockListViewModel()
   private var selectedStockIndex: IndexPath?
+    private var token: Any?
 
   // MARK: Lifecycle
   override func viewDidLoad() {
@@ -21,7 +22,13 @@ final class StockListTableViewController: UITableViewController {
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     tableView.reloadData()
+    
+      checkStocksUpdateII()
   }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        token.map { NotificationCenter.default.removeObserver($0) }
+    }
 
   // MARK: Helpers
   private func configureUI() {
@@ -30,6 +37,29 @@ final class StockListTableViewController: UITableViewController {
     tableView.register(StockCell.self, forCellReuseIdentifier: StockCell.identifier)
     tableView.rowHeight = 60
   }
+    
+    private func checkStocksUpdate() {
+        NotificationCenter.myCenter.addObserver(self, selector: #selector(someFunc), name: .didReceiveStockUpdate, object: nil)
+    }
+    
+    private func checkStocksUpdateII() {
+        var notificationCounter = 0
+        token = NotificationCenter.myCenter.addObserver(forName: .didReceiveStockUpdate,
+                                                        object: nil,
+                                                        queue: .current) { notification in
+            
+            notificationCounter += 1
+            print(notificationCounter)
+            self.stockListViewModel.stocks = notification.userInfo![stockInfoKey] as! [Stock]
+            self.tableView.reloadData()
+            
+        }
+    }
+    
+    @objc private func someFunc(_ notification: Notification) {
+        stockListViewModel.stocks = notification.userInfo![stockInfoKey] as! [Stock]
+        tableView.reloadData()
+    }
 }
 
 extension StockListTableViewController {
